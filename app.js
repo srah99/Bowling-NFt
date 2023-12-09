@@ -6,6 +6,7 @@ import BowlingNFT from './contracts/BowlingNFT.json';
 const App = () => {
   const [contract, setContract] = useState(null);
   const [ethUSDPrice, setEthUSDPrice] = useState(0);
+  const [isSubscriber, setIsSubscriber] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -31,10 +32,24 @@ const App = () => {
     }
   };
 
-  const getETHUSDPrice = async () => {
+  const subscribe = async () => {
     if (contract) {
-      const price = await contract.getETHUSDPrice();
-      setEthUSDPrice(price);
+      await contract.subscribe({ value: ethers.utils.parseEther('5.99') });
+      setIsSubscriber(true);
+    }
+  };
+
+  const unsubscribe = async () => {
+    if (contract) {
+      await contract.unsubscribe();
+      setIsSubscriber(false);
+    }
+  };
+
+  const analyzeStatistics = async (tokenId) => {
+    if (contract) {
+      const result = await contract.analyzeStatistics(tokenId);
+      console.log(result);
     }
   };
 
@@ -42,8 +57,13 @@ const App = () => {
     <div>
       <h1>Bowling NFT Platform</h1>
       <button onClick={mintNFT}>Mint NFT</button>
-      <button onClick={getETHUSDPrice}>Get ETH/USD Price</button>
+      {!isSubscriber ? (
+        <button onClick={subscribe}>Subscribe ($5.99/month)</button>
+      ) : (
+        <button onClick={unsubscribe}>Unsubscribe</button>
+      )}
       <p>ETH/USD Price: ${ethUSDPrice}</p>
+      <button onClick={() => analyzeStatistics(1)}>Analyze Statistics for Token ID 1</button>
     </div>
   );
 };
